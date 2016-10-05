@@ -1,1 +1,6 @@
 gen/
+build
+gradle
+.gradle
+local.properties
+.idea
