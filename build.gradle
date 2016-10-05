@@ -13,6 +13,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'distribution'
 
 dependencies {
 	compile 'com.android.support:support-v4:20.0.+'
@@ -21,4 +22,8 @@ dependencies {
 android {
 	compileSdkVersion 22
 	buildToolsVersion "22.0.1"
+}
+
+distributions.main.contents.from(".") {
+	include "README.md"
 }
