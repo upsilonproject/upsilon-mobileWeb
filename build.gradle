@@ -19,12 +19,28 @@ dependencies {
 	compile 'com.android.support:support-v4:20.0.+'
 }
 
+String secretDir = System.env.UPSILON_MOBILE_SECRETS_DIR
+
+println secretDir
+
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream("$secretDir/keystore.properties"))
+
 android {
 	compileSdkVersion 22
 	buildToolsVersion "22.0.1"
+
+	signingConfigs {
+		config {
+            keyAlias keystoreProperties['keyAlias']
+			keyPassword keystoreProperties['keyPassword']
+			storeFile file(keystoreProperties['storeFile'])
+			storePassword keystoreProperties['storePassword']			
+		}
+	}
 }
 
 //distributions.main.contents.name = "upsilon-mobileWeb"
 distributions.main.contents.from(".") {
-	include "README.md"
+include "README.md"
 }
