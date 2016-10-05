@@ -56,7 +56,8 @@ node {
 	checkout scm
 
 	stage "Compile"
-	sh "${gradle}/bin/gradle assemble distZip"
+	sh "${gradle}/bin/gradle assemble"
+	sh "${gradle}/bin/gradle distZip"
 
 	stash includes:"build/distributions/*.zip", name: "binaries"
 }
