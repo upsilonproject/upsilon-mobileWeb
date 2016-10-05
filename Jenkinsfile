@@ -25,27 +25,3 @@ node {
 	archive: "build/outputs/*-release.apk"
 }
 
-node {
-	stage "Smoke"
-	echo "Smokin' :)"
-}
-
-stage "Package"
-
-node {                                                                             
-    buildRpm("el7")                                                                
-}                                                                                  
-                                                                                   
-node {                                                                             
-    buildRpm("el6")                                                                
-}                                                                                  
-                                                                                   
-node {                                                                             
-    buildRpm("fc24")                                                               
-}
-
-node {
-//	buildDeb("ubuntu-16.4")
-}
-
-
