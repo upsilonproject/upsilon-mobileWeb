@@ -1,5 +1,7 @@
 #!groovy
 
+project.name = "upsilon-mobileWeb"
+
 buildscript {
 	repositories {
 		mavenCentral()

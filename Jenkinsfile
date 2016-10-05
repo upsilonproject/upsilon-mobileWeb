@@ -22,6 +22,6 @@ node {
 	sh "${gradle}/bin/gradle distZip"
 	sh "find"
 
-	archive: "build/outputs/*-release.apk"
+	archive "build/outputs/apk/*-release.apk"
 }
 
