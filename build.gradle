@@ -1,6 +1,6 @@
 #!groovy
 
-project.name = "upsilon-mobileWeb"
+name = "upsilon-mobileWeb"
 
 buildscript {
 	repositories {
