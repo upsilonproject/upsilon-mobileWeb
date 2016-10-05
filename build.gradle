@@ -24,7 +24,7 @@ android {
 	buildToolsVersion "22.0.1"
 }
 
-distributions.main.contents.name = "upsilon-mobileWeb"
+//distributions.main.contents.name = "upsilon-mobileWeb"
 distributions.main.contents.from(".") {
 	include "README.md"
 }
