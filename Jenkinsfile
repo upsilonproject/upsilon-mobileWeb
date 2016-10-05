@@ -58,6 +58,7 @@ node {
 	stage "Compile"
 	sh "${gradle}/bin/gradle assemble"
 	sh "${gradle}/bin/gradle distZip"
+	sh "find"
 
 	stash includes:"build/distributions/*.zip", name: "binaries"
 }
