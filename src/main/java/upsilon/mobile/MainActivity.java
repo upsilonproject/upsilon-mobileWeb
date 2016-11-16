@@ -5,8 +5,11 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -18,7 +21,21 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.util.Locale;
+import java.util.Random;
+
 public class MainActivity extends FragmentActivity implements ActionBar.OnNavigationListener {
+	/**
+	 * ATTENTION: This was auto-generated to implement the App Indexing API.
+	 * See https://g.co/AppIndexing/AndroidStudio for more information.
+	 */
+	private GoogleApiClient client;
+
 	protected SharedPreferences getPrefs() {
 		return getSharedPreferences("upsilon", 0);
 	}
@@ -26,12 +43,23 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 	protected String getUrl() {
 		return getPrefs().getString("url", "about:blank");
 	}
-	
+
+	private TextToSpeech engine;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		setContentView(R.layout.activity_main);
+
+		new Thread(new MessageListener());
+
+		this.engine = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+			public void onInit(int status) {
+
+			}
+		});
+		this.engine.setLanguage(Locale.UK);
 
 		try {
 
@@ -62,40 +90,43 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		} catch (Exception e) {
 			alert("global exception", e.toString());
 		}
+		// ATTENTION: This was auto-generated to implement the App Indexing API.
+		// See https://g.co/AppIndexing/AndroidStudio for more information.
+		client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 	}
-	 
+
 	private void promptForUrl(String q) {
 		final EditText input = new EditText(this);
-		input.setMaxLines(1); 
+		input.setMaxLines(1);
 		input.setText(getPrefs().getString("url", ""));
-		
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("upsilon-web URL?"); 
-		builder.setView(input);  
-		
+		builder.setTitle("upsilon-web URL?");
+		builder.setView(input);
+
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				String res = input.getText().toString();
 				urlChanged(res);
 			}
-		});  
-		
-		builder.show();  
+		});
+
+		builder.show();
 	}
-	
-	private String url; 
-	 
+
+	private String url;
+
 	private void urlChanged(String url) {
-		this.url = url; 
-		
+		this.url = url;
+
 		SharedPreferences.Editor editor = getPrefs().edit();
 		editor.putString("url", url);
-		editor.commit();  
-		 
+		editor.commit();
+
 		alert("", "URL set!\n\nPlease click the refresh button. ");
 	}
-  
+
 	private WebView web;
 
 	public void onClearCache(MenuItem mniClear) {
@@ -106,7 +137,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		alertClear.setMessage("Cache Cleared!");
 		alertClear.show();
 
-		refresh(); 
+		refresh();
 	}
 
 	public void refresh() {
@@ -128,19 +159,29 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		} catch (Exception e) {
 			version = "???";
 		}
- 
+
 		alert("About", "Version: " + version);
+
+		speak("Hello World");
 	}
-	 
+
 	public void onMniSetUrlClicked(MenuItem mni) {
 		promptForUrl("Set URL");
 	}
-	 
-	private void alert(String title, String content) {
+
+	public void alert(String title, String content) {
 		AlertDialog alertAbout = new AlertDialog.Builder(this).create();
 		alertAbout.setTitle(title);
 		alertAbout.setMessage(content);
 		alertAbout.show();
+	}
+
+	public void speak(String msg) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			engine.speak(msg, TextToSpeech.QUEUE_FLUSH, null, msg);
+		} else {
+			engine.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
+		}
 	}
 
 	@Override
@@ -177,4 +218,39 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		return false;
 	}
 
+	/**
+	 * ATTENTION: This was auto-generated to implement the App Indexing API.
+	 * See https://g.co/AppIndexing/AndroidStudio for more information.
+	 */
+	public Action getIndexApiAction() {
+		Thing object = new Thing.Builder()
+				.setName("Main Page") // TODO: Define a title for the content shown.
+				// TODO: Make sure this auto-generated URL is correct.
+				.setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+				.build();
+		return new Action.Builder(Action.TYPE_VIEW)
+				.setObject(object)
+				.setActionStatus(Action.STATUS_TYPE_COMPLETED)
+				.build();
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+
+		// ATTENTION: This was auto-generated to implement the App Indexing API.
+		// See https://g.co/AppIndexing/AndroidStudio for more information.
+		client.connect();
+		AppIndex.AppIndexApi.start(client, getIndexApiAction());
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+		// ATTENTION: This was auto-generated to implement the App Indexing API.
+		// See https://g.co/AppIndexing/AndroidStudio for more information.
+		AppIndex.AppIndexApi.end(client, getIndexApiAction());
+		client.disconnect();
+	}
 }
