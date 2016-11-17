@@ -29,7 +29,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import java.util.Locale;
 import java.util.Random;
 
-public class MainActivity extends FragmentActivity implements ActionBar.OnNavigationListener {
+public class MainActivity extends FragmentActivity implements ActionBar.OnNavigationListener, MessageListener.Listener {
 	/**
 	 * ATTENTION: This was auto-generated to implement the App Indexing API.
 	 * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -44,15 +44,38 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		return getPrefs().getString("url", "about:blank");
 	}
 
+	public void onConnected() {
+		getConnStatus().setText("Connected");
+		getConnStatus().setBackgroundColor(getResources().getColor(R.color.color_connected));
+	}
+
+	public void onDisconnected() {
+		getConnStatus().setText("Disconnected");
+		getConnStatus().setBackgroundColor(getResources().getColor(R.color.color_disconnected));
+	}
+
+	public void onError(String message) {
+		getConnStatus().setText("Error");
+		getConnStatus().setBackgroundColor(getResources().getColor(R.color.color_error));
+
+		this.alert("Exception", message);
+	}
+
+	private TextView getConnStatus() {
+		return (TextView) this.findViewById(R.id.action_connstatus);
+	}
+
 	private TextToSpeech engine;
+	private MessageListener messageListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_main);
+		this.messageListener = new MessageListener();
+		this.messageListener.addListener(this);
 
-		new Thread(new MessageListener());
+		setContentView(R.layout.activity_main);
 
 		this.engine = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
 			public void onInit(int status) {
@@ -90,6 +113,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		} catch (Exception e) {
 			alert("global exception", e.toString());
 		}
+
+		this.messageListener.reconnect();
+
 		// ATTENTION: This was auto-generated to implement the App Indexing API.
 		// See https://g.co/AppIndexing/AndroidStudio for more information.
 		client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -192,6 +218,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		refresh();
 	}
 
+	public void onClickConn(MenuItem mni) {
+		if (this.messageListener.isConnected()) {
+			this.messageListener.sendHeartbeat();
+		} else {
+			this.messageListener.reconnect();
+		}
+	}
+
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 	}
@@ -226,7 +260,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		Thing object = new Thing.Builder()
 				.setName("Main Page") // TODO: Define a title for the content shown.
 				// TODO: Make sure this auto-generated URL is correct.
-				.setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+				.setUrl(Uri.parse("http://upsilon-project.co.uk"))
 				.build();
 		return new Action.Builder(Action.TYPE_VIEW)
 				.setObject(object)

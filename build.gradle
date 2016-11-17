@@ -9,7 +9,8 @@ buildscript {
 	dependencies {
 		classpath 'com.android.tools.build:gradle:1.5.0'
 //		classpath 'com.android.support:support-core-utils:24.2.1'
-	}	
+	}
+
 }
 
 apply plugin: 'com.android.application'
@@ -36,6 +37,10 @@ keystoreProperties.load(new FileInputStream("$secretDir/keystore.properties"))
 android {
 	compileSdkVersion 22
 	buildToolsVersion "22.0.1"
+
+	lintOptions {
+		abortOnError false
+	}
 
 	signingConfigs {
 		release {
