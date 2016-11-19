@@ -7,7 +7,7 @@
         android:showAsAction="always|withText"
         android:id="@+id/action_connstatus"
         android:checkable="false"
-        tools:onClick="onClickConn" />
+        android:onClick="onClickConn" />
     <item
         android:id="@+id/action_refresh"
         android:orderInCategory="51"

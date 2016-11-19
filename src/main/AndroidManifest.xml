@@ -2,12 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="upsilon.mobile"
     android:versionCode="2"
-    android:versionName="1.6" >
+    android:versionName="1.7" >
 
     <uses-sdk
         android:minSdkVersion="17"
         android:targetSdkVersion="17" />
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
     <application
         android:allowBackup="true"

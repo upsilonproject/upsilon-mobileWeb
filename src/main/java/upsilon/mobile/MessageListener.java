@@ -12,12 +12,11 @@ import java.util.Date;
 import static com.rabbitmq.client.AMQP.Queue.DeclareOk;
 
 public class MessageListener implements Runnable {
-    private MainActivity mainActivity;
-
     public interface Listener {
         public void onConnected();
         public void onDisconnected();
         public void onError(String message);
+        public void onNotification(String message);
     }
 
     private Listener listener;
@@ -26,7 +25,13 @@ public class MessageListener implements Runnable {
         this.listener = l;
     }
 
+    private Thread connThread;
+
     public boolean isConnected() {
+        if (this.conn == null) {
+            return false;
+        }
+
         return conn.isOpen();
     }
 
@@ -35,9 +40,10 @@ public class MessageListener implements Runnable {
 
     public void run() {
         ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("upsilon.teratan.net");
 
         try {
-            conn = factory.newConnection();
+            this.conn = factory.newConnection();
 
             if (conn.isOpen()) {
                 listener.onConnected();
@@ -56,12 +62,9 @@ public class MessageListener implements Runnable {
             while (true) {
                 QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 
-                mainActivity.speak(new String(delivery.getBody()));
-
-                this.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), true);
+                listener.onNotification(new String(delivery.getBody()));
             }
         } catch (Exception e) {
-            mainActivity.alert("amqp exception", e.getMessage());
             listener.onError(e.getMessage());
         }
 
@@ -80,14 +83,17 @@ public class MessageListener implements Runnable {
     }
 
     public void reconnect() {
-        if (this.conn.isOpen()) {
-            try {
-                this.conn.close();
-            } catch (Exception e) {
+        if (this.conn != null) {
+            if (this.conn.isOpen()) {
+                try {
+                    this.conn.close();
+                } catch (Exception e) {
 
+                }
             }
         }
 
-        new Thread(this, "conn thread");
+        this.connThread = new Thread(this, "conn thread");
+        this.connThread.start();
     }
 }

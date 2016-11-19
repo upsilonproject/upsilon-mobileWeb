@@ -9,7 +9,7 @@
     <string name="action_clear_cache">Clear Cache</string>
     <string name="icon_refresh">ic_menu_refresh.png</string>
     <string name="text_setUrl">Set URL</string>
-    <string name="conn_waiting">WAITING</string>
+    <string name="conn_waiting">WAITING!</string>
     <string name="conn_connected">CONNECTED</string>
     <string name="conn_disconnected">DISCONNECTED</string>
 </resources>
