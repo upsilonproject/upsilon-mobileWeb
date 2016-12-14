@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Upsilon Mobile Web</string>
+    <string name="app_name">Upsilon</string>
     <string name="action_refresh">Refresh1232</string>
     <string name="default_status_text">[not yet updated]</string>
     <string name="action_about">About</string>

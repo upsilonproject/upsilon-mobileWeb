@@ -11,13 +11,25 @@ import java.util.Date;
 
 import static com.rabbitmq.client.AMQP.Queue.DeclareOk;
 
-public class MessageListener implements Runnable {
+public class AmqpHandler implements Runnable {
     public interface Listener {
         public void onConnected();
         public void onDisconnected();
         public void onError(String message);
         public void onNotification(String message);
     }
+
+    public static AmqpHandler getInstance() {
+        if (AmqpHandler.instance == null) {
+            AmqpHandler.instance = new AmqpHandler();
+        }
+
+        return AmqpHandler.instance;
+    }
+
+    private static AmqpHandler instance;
+
+    private AmqpHandler() {}
 
     private Listener listener;
 

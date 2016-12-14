@@ -1,18 +1,22 @@
 package upsilon.mobile;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationCompat;
@@ -31,10 +35,10 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
-public class MainActivity extends FragmentActivity implements ActionBar.OnNavigationListener, MessageListener.Listener {
+public class MainActivity extends FragmentActivity implements ActionBar.OnNavigationListener, AmqpHandler.Listener {
 	/**
 	 * ATTENTION: This was auto-generated to implement the App Indexing API.
 	 * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -88,13 +92,43 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 	}
 
 	private TextToSpeech engine;
-	private MessageListener messageListener;
+	private AmqpHandler messageListener;
+
+	private static final int SPEECH_REQUEST_CODE = 0;
+
+	public void setupSpeech() {
+		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+
+		startActivityForResult(intent, SPEECH_REQUEST_CODE);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
+			List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+
+			String sentenace = "";
+
+			for (String word : results) {
+				sentenace += word + " ";
+			}
+
+			this.speak("You said; " + sentenace);
+		}
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		if (getIntent().getAction() != null && getIntent().getAction().equals("com.google.android.gms.actions.SEARCH_ACTION")) {
+			String query = getIntent().getStringExtra(SearchManager.QUERY);
+
+			speak("You said: " +  query);
+		}
+
 		super.onCreate(savedInstanceState);
 
-		this.messageListener = new MessageListener();
+		this.messageListener = AmqpHandler.getInstance();
 		this.messageListener.addListener(this);
 
 		setContentView(R.layout.activity_main);
