@@ -124,6 +124,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 			String query = getIntent().getStringExtra(SearchManager.QUERY);
 
 			speak("You said: " +  query);
+			return;
 		}
 
 		super.onCreate(savedInstanceState);
@@ -132,13 +133,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		this.messageListener.addListener(this);
 
 		setContentView(R.layout.activity_main);
-
-		this.engine = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-			public void onInit(int status) {
-
-			}
-		});
-		this.engine.setLanguage(Locale.UK);
 
 		try {
 
@@ -257,6 +251,15 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 	}
 
 	private void speak(String msg) {
+		if (engine == null) {
+			this.engine = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+				public void onInit(int status) {
+
+				}
+			});
+			this.engine.setLanguage(Locale.UK); 
+		}
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			engine.speak(msg, TextToSpeech.QUEUE_FLUSH, null, msg);
 		} else {
