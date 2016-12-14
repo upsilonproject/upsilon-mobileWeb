@@ -120,14 +120,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
 		if (getIntent().getAction() != null && getIntent().getAction().equals("com.google.android.gms.actions.SEARCH_ACTION")) {
 			String query = getIntent().getStringExtra(SearchManager.QUERY);
 
 			speak("You said: " +  query);
 			return;
 		}
-
-		super.onCreate(savedInstanceState);
 
 		this.messageListener = AmqpHandler.getInstance();
 		this.messageListener.addListener(this);
@@ -257,7 +257,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 
 				}
 			});
-			this.engine.setLanguage(Locale.UK); 
+			this.engine.setLanguage(Locale.UK);
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
