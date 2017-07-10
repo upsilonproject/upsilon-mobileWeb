@@ -23,8 +23,8 @@ repositories {
 
 dependencies {
 	compile 'com.android.support:support-v4:20.0.+'
-	compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 	compile 'com.rabbitmq:amqp-client:3.6.5'
+	compile 'com.google.firebase:firebase-appindexing:10.0.0'
 }
 
 String secretDir = System.env.UPSILON_MOBILE_SECRETS_DIR
