@@ -1,8 +1,16 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/action_refresh"
+        android:title="@string/conn_waiting"
         android:orderInCategory="50"
+        android:showAsAction="always|withText"
+        android:id="@+id/action_connstatus"
+        android:checkable="false"
+        android:onClick="onClickConn" />
+    <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="51"
         android:showAsAction="always"
         android:title="@string/action_refresh" android:onClick="onClickRefresh" android:icon="@drawable/ic_menu_refresh"/>
     <item android:id="@+id/action_about" android:title="@string/action_about" android:onClick="onMniAboutClicked" android:orderInCategory="100"></item>

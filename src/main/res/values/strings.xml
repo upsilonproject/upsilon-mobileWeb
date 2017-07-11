@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Upsilon Mobile Web</string>
+    <string name="app_name">Upsilon</string>
     <string name="action_refresh">Refresh1232</string>
     <string name="default_status_text">[not yet updated]</string>
     <string name="action_about">About</string>
@@ -9,5 +9,7 @@
     <string name="action_clear_cache">Clear Cache</string>
     <string name="icon_refresh">ic_menu_refresh.png</string>
     <string name="text_setUrl">Set URL</string>
-
+    <string name="conn_waiting">WAITING!</string>
+    <string name="conn_connected">CONNECTED</string>
+    <string name="conn_disconnected">DISCONNECTED</string>
 </resources>

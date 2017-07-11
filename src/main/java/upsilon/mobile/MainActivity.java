@@ -2,15 +2,24 @@ package upsilon.mobile;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.SearchManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,10 +35,10 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
-public class MainActivity extends FragmentActivity implements ActionBar.OnNavigationListener {
+public class MainActivity extends FragmentActivity implements ActionBar.OnNavigationListener, AmqpHandler.Listener {
 	/**
 	 * ATTENTION: This was auto-generated to implement the App Indexing API.
 	 * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -44,22 +53,86 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		return getPrefs().getString("url", "about:blank");
 	}
 
+	public void onConnected() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				MainActivity.this.setStatusText("Connected");
+				MainActivity.this.getConnStatus().setText("Connected");
+				MainActivity.this.getConnStatus().setBackgroundColor(MainActivity.this.getResources().getColor(R.color.color_connected));
+			}
+		});
+	}
+
+	public void onDisconnected() {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				setStatusText("Disconnected");
+				getConnStatus().setText("Disconnected");
+				getConnStatus().setBackgroundColor(getResources().getColor(R.color.color_disconnected));
+			}
+		});
+	}
+
+	public void onError(final String message) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				MainActivity.this.setStatusText("Error");
+				MainActivity.this.getConnStatus().setText("Error");
+				MainActivity.this.getConnStatus().setBackgroundColor(MainActivity.this.getResources().getColor(R.color.color_error));
+
+				MainActivity.this.alert("Exception", message);
+			}
+		});
+	}
+
+	private TextView getConnStatus() {
+		return (TextView) this.findViewById(R.id.action_connstatus);
+	}
+
 	private TextToSpeech engine;
+	private AmqpHandler messageListener;
+
+	private static final int SPEECH_REQUEST_CODE = 0;
+
+	public void setupSpeech() {
+		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+
+		startActivityForResult(intent, SPEECH_REQUEST_CODE);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
+			List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+
+			String sentenace = "";
+
+			for (String word : results) {
+				sentenace += word + " ";
+			}
+
+			this.speak("You said; " + sentenace);
+		}
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		if (getIntent().getAction() != null && getIntent().getAction().equals("com.google.android.gms.actions.SEARCH_ACTION")) {
+			String query = getIntent().getStringExtra(SearchManager.QUERY);
+
+			speak("You said: " +  query);
+			return;
+		}
+
+		this.messageListener = AmqpHandler.getInstance();
+		this.messageListener.addListener(this);
+
 		setContentView(R.layout.activity_main);
-
-		new Thread(new MessageListener());
-
-		this.engine = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-			public void onInit(int status) {
-
-			}
-		});
-		this.engine.setLanguage(Locale.UK);
 
 		try {
 
@@ -90,6 +163,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		} catch (Exception e) {
 			alert("global exception", e.toString());
 		}
+
 		// ATTENTION: This was auto-generated to implement the App Indexing API.
 		// See https://g.co/AppIndexing/AndroidStudio for more information.
 		client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -176,11 +250,37 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		alertAbout.show();
 	}
 
-	public void speak(String msg) {
+	private void speak(String msg) {
+		if (engine == null) {
+			this.engine = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+				public void onInit(int status) {
+
+				}
+			});
+			this.engine.setLanguage(Locale.UK);
+		}
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 			engine.speak(msg, TextToSpeech.QUEUE_FLUSH, null, msg);
 		} else {
 			engine.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
+		}
+	}
+
+	@Override
+	public void onNotification(String message) {
+		AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+
+		if (am.isWiredHeadsetOn()) {
+			this.speak(message);
+		} else {
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+			builder.setSmallIcon(R.drawable.ic_launcher);
+			builder.setContentTitle("Upsilon");
+			builder.setContentText(message);
+
+			NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			manager.notify(message.hashCode(), builder.build());
 		}
 	}
 
@@ -190,6 +290,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 
 	public void onClickRefresh(MenuItem mnu) {
 		refresh();
+	}
+
+	public void onClickConn(MenuItem mni) {
+		if (this.messageListener.isConnected()) {
+			this.messageListener.sendHeartbeat();
+		} else {
+			this.messageListener.reconnect();
+		}
 	}
 
 	@Override
@@ -205,12 +313,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 
 	public void setStatusText(String result) {
 		TextView et = (TextView) findViewById(R.id.TextView1);
-		et.setText(result);
+		et.setText("sst" + result);
 	}
 
 	public void setText(String result) {
 		WebView web = (WebView) findViewById(R.id.webView1);
-		web.loadData(result, "text/html", null);
+		web.loadData("st"+result, "text/html", null);
 	}
 
 	@Override
@@ -226,7 +334,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		Thing object = new Thing.Builder()
 				.setName("Main Page") // TODO: Define a title for the content shown.
 				// TODO: Make sure this auto-generated URL is correct.
-				.setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+				.setUrl(Uri.parse("http://upsilon-project.co.uk"))
 				.build();
 		return new Action.Builder(Action.TYPE_VIEW)
 				.setObject(object)
