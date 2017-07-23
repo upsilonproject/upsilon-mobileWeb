@@ -1,16 +1,17 @@
 #!groovy
 
 buildscript {
-	repositories {
-		jcenter()
-		mavenCentral()
-		mavenLocal()
-	}
+    repositories {
+        jcenter()
+        mavenCentral()
+        mavenLocal()
+    }
 
-	dependencies {
-		classpath 'com.android.tools.build:gradle:2.3.3'
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.3'
 //		classpath 'com.android.support:support-core-utils:24.2.1'
-	}
+        classpath 'com.google.gms:google-services:3.0.0'
+    }
 
 }
 
@@ -18,20 +19,21 @@ apply plugin: 'com.android.application'
 apply plugin: 'distribution'
 
 repositories {
-	mavenCentral()
-	mavenLocal()
+    jcenter()
+    mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
-	compile 'com.rabbitmq:amqp-client:3.6.5'
-	compile 'com.google.firebase:firebase-appindexing:11.0.2'
-	compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.rabbitmq:amqp-client:3.6.5'
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.google.firebase:firebase-appindexing:10.0.1'
 }
 
 String secretDir = System.env.UPSILON_MOBILE_SECRETS_DIR
 
 if (secretDir == null) {
-	secretDir = '/opt/upsilon-mobileWeb-secrets'
+    secretDir = '/opt/upsilon-mobileWeb-secrets'
 }
 
 println secretDir
@@ -40,35 +42,38 @@ def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream("$secretDir/keystore.properties"))
 
 android {
-	compileSdkVersion 22
-	buildToolsVersion '25.0.0'
+    compileSdkVersion 22
+    buildToolsVersion '25.0.0'
 
-	lintOptions {
-		abortOnError false
-	}
+    lintOptions {
+        abortOnError false
+    }
 
-	signingConfigs {
-		release {
+    signingConfigs {
+        release {
             keyAlias keystoreProperties['keyAlias']
-			keyPassword keystoreProperties['keyPassword']
-			storeFile file(keystoreProperties['storeFile'])
-			storePassword keystoreProperties['storePassword']			
-		}
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']			
+    }
 	}
 
-	buildTypes {
-		release {
-			signingConfig signingConfigs.release
-			applicationVariants.all { variant ->
-				def file = variant.outputs.each { output -> 
-					output.outputFile = new File(output.outputFile.parent, output.outputFile.name.replace(".apk", "-${variant.versionName}.apk"))
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            applicationVariants.all { variant ->
+				def
+                file = variant.outputs.each { output -> 
+                            output.outputFile = new File(output.outputFile.parent, output.outputFile.name.replace(".apk", "-${variant.versionName}.apk"))
 				}
 			}
 		}
-	}
-}
+        }
+    }
 
 //distributions.main.contents.name = "upsilon-mobileWeb"
 distributions.main.contents.from(".") {
-	include "README.md"
+    include "README.md"
 }
+
+apply plugin: 'com.google.gms.google-services'
