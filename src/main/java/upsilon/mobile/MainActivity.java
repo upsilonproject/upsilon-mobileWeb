@@ -150,6 +150,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 
 			this.web = (WebView) findViewById(R.id.webView1);
 			this.web.getSettings().setAppCacheEnabled(false);
+			this.web.getSettings().setJavaScriptEnabled(true);
 			this.web.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
 			this.web.setWebViewClient(new WebViewClient() {
 				@Override

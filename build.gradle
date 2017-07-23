@@ -7,7 +7,7 @@ buildscript {
 	}
 
 	dependencies {
-		classpath 'com.android.tools.build:gradle:1.5.0'
+		classpath 'com.android.tools.build:gradle:2.3.3'
 //		classpath 'com.android.support:support-core-utils:24.2.1'
 	}
 
@@ -15,7 +15,6 @@ buildscript {
 
 apply plugin: 'com.android.application'
 apply plugin: 'distribution'
-apply plugin: 'com.google.gms.google-services'
 
 repositories {
 	mavenCentral()
@@ -23,9 +22,9 @@ repositories {
 }
 
 dependencies {
-	compile 'com.android.support:support-v4:20.0.+'
 	compile 'com.rabbitmq:amqp-client:3.6.5'
 	compile 'com.google.firebase:firebase-appindexing:11.0.2'
+	compile 'com.android.support:support-v4:25.3.1'
 }
 
 String secretDir = System.env.UPSILON_MOBILE_SECRETS_DIR
@@ -41,7 +40,7 @@ keystoreProperties.load(new FileInputStream("$secretDir/keystore.properties"))
 
 android {
 	compileSdkVersion 22
-	buildToolsVersion "22.0.1"
+	buildToolsVersion '25.0.0'
 
 	lintOptions {
 		abortOnError false
@@ -70,5 +69,5 @@ android {
 
 //distributions.main.contents.name = "upsilon-mobileWeb"
 distributions.main.contents.from(".") {
-include "README.md"
+	include "README.md"
 }
