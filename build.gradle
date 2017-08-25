@@ -45,6 +45,10 @@ android {
     compileSdkVersion 22
     buildToolsVersion '25.0.0'
 
+	dexOptions {
+		javaMaxHeapSize "1.6g"
+	}
+
     lintOptions {
         abortOnError false
     }
