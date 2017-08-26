@@ -1,0 +1,22 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <PreferenceCategory android:title="upsilon-web">
+        <EditTextPreference
+            android:key="hostname_web"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="The home URL for upsilon-web, eg: http://upsilon.example.com"
+            android:title="Web Hostname" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="AMQP">
+        <EditTextPreference
+            android:key="hostname_amqp"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="The hostname of the AMQP server."
+            android:title="AMQP Hostname" />
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

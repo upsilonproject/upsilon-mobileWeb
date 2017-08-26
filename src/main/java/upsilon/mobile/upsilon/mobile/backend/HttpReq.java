@@ -1,4 +1,4 @@
-package upsilon.mobile;
+package upsilon.mobile.upsilon.mobile.backend;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -16,6 +16,8 @@ import javax.net.ssl.X509TrustManager;
 
 import android.os.AsyncTask;
 import android.util.Log;
+
+import upsilon.mobile.MainActivity;
 
 public class HttpReq extends AsyncTask<String, String, String> {
 	public HttpReq(MainActivity main) {

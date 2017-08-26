@@ -1,28 +1,30 @@
 package upsilon.mobile;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.SearchManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -38,7 +40,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends FragmentActivity implements ActionBar.OnNavigationListener, AmqpHandler.Listener {
+import upsilon.mobile.upsilon.mobile.backend.AmqpHandler;
+
+public class MainActivity extends AppCompatActivity implements AmqpHandler.Listener {
 	/**
 	 * ATTENTION: This was auto-generated to implement the App Indexing API.
 	 * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -46,11 +50,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 	private GoogleApiClient client;
 
 	protected SharedPreferences getPrefs() {
-		return getSharedPreferences("upsilon", 0);
-	}
-
-	protected String getUrl() {
-		return getPrefs().getString("url", "about:blank");
+		return PreferenceManager.getDefaultSharedPreferences(this);
 	}
 
 	public void onConnected() {
@@ -121,6 +121,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		if (getIntent().getAction() != null && getIntent().getAction().equals("com.google.android.gms.actions.SEARCH_ACTION")) {
 			String query = getIntent().getStringExtra(SearchManager.QUERY);
@@ -130,23 +131,24 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		}
 
 		this.messageListener = AmqpHandler.getInstance();
+		this.messageListener.setHostname(getPrefs().getString("hostname_amqp", "localhost"));
 		this.messageListener.addListener(this);
 
 		setContentView(R.layout.activity_main);
 
 		try {
-
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
-			final ActionBar actionBar = getActionBar();
-			actionBar.setTitle(R.string.app_name);
-			actionBar.setDisplayShowTitleEnabled(true);
-
-			this.url = getPrefs().getString("url", "");
-
-			if (url.isEmpty()) {
-				promptForUrl("URL");
+			if (getUrl().isEmpty()) {
+				this.setText("please set upsilon-web URL in settings");
 			}
+
+			Toolbar tb = (Toolbar) findViewById(R.id.toolbar);
+			tb.setNavigationIcon(R.drawable.ic_launcher);
+			//tb.setLogo(R.drawable.ic_launcher);
+			setSupportActionBar(tb);
+			//getSupportActionBar().setIcon(R.drawable.ic_launcher);
+			//getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 			this.web = (WebView) findViewById(R.id.webView1);
 			this.web.getSettings().setAppCacheEnabled(false);
@@ -170,36 +172,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 	}
 
-	private void promptForUrl(String q) {
-		final EditText input = new EditText(this);
-		input.setMaxLines(1);
-		input.setText(getPrefs().getString("url", ""));
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("upsilon-web URL?");
-		builder.setView(input);
-
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				String res = input.getText().toString();
-				urlChanged(res);
-			}
-		});
-
-		builder.show();
-	}
-
-	private String url;
-
-	private void urlChanged(String url) {
-		this.url = url;
-
-		SharedPreferences.Editor editor = getPrefs().edit();
-		editor.putString("url", url);
-		editor.commit();
-
-		alert("", "URL set!\n\nPlease click the refresh button. ");
+	public String getUrl() {
+		return getPrefs().getString("hostname_web", "about:blank");
 	}
 
 	private WebView web;
@@ -215,16 +189,25 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		refresh();
 	}
 
+	public void onMniSettingsClicked(MenuItem mniSettings) {
+		Intent isettings = new Intent(this, SettingsActivity.class);
+
+		startActivity(isettings);
+	}
+
 	public void refresh() {
+		Log.w("refreshing", "url: " + getUrl());
 		setStatusText("Waiting...");
 
-		web.loadUrl(this.url);
+		web.loadUrl(getUrl());
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		setText(item.toString());
-		return super.onOptionsItemSelected(item);
+		DrawerLayout o = (DrawerLayout) findViewById(R.id.drawer);
+		o.openDrawer(findViewById(R.id.nav_view));
+
+		return true;
 	}
 
 	public void onMniAboutClicked(MenuItem about) {
@@ -238,10 +221,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 		alert("About", "Version: " + version);
 
 		speak("Hello World");
-	}
-
-	public void onMniSetUrlClicked(MenuItem mni) {
-		promptForUrl("Set URL");
 	}
 
 	public void alert(String title, String content) {
@@ -314,17 +293,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.OnNaviga
 
 	public void setStatusText(String result) {
 		TextView et = (TextView) findViewById(R.id.TextView1);
-		et.setText("sst" + result);
+		et.setText("sst: " + result);
 	}
 
 	public void setText(String result) {
 		WebView web = (WebView) findViewById(R.id.webView1);
-		web.loadData("st"+result, "text/html", null);
-	}
-
-	@Override
-	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-		return false;
+		web.loadData("st: "+result, "text/html", null);
 	}
 
 	/**

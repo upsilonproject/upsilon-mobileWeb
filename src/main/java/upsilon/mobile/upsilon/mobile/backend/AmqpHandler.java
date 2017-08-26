@@ -1,7 +1,8 @@
-package upsilon.mobile;
+package upsilon.mobile.upsilon.mobile.backend;
+
+import android.preference.PreferenceManager;
 
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.BasicProperties;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
@@ -29,6 +30,8 @@ public class AmqpHandler implements Runnable {
 
     private static AmqpHandler instance;
 
+    private String hostname = "localhost";
+
     private AmqpHandler() {}
 
     private Listener listener;
@@ -47,12 +50,16 @@ public class AmqpHandler implements Runnable {
         return conn.isOpen();
     }
 
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
     private Connection conn;
     private Channel channel;
 
     public void run() {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("upsilon.teratan.net");
+        factory.setHost(this.hostname);
 
         try {
             this.conn = factory.newConnection();

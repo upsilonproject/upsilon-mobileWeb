@@ -26,8 +26,12 @@ repositories {
 
 dependencies {
     compile 'com.rabbitmq:amqp-client:3.6.5'
-    compile 'com.android.support:support-v4:25.3.1'
     compile 'com.google.firebase:firebase-appindexing:10.0.1'
+    compile 'com.android.support:appcompat-v7:26.+'
+    compile 'com.android.support:design:26.+'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support:support-vector-drawable:25.3.1'
 }
 
 String secretDir = System.env.UPSILON_MOBILE_SECRETS_DIR
@@ -42,12 +46,12 @@ def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream("$secretDir/keystore.properties"))
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
 
-	dexOptions {
-		javaMaxHeapSize "2g"
-	}
+    dexOptions {
+        javaMaxHeapSize "2g"
+    }
 
     lintOptions {
         abortOnError false
@@ -58,8 +62,8 @@ android {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
             storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']			
-    }
+            storePassword keystoreProperties['storePassword']
+        }
 	}
 
     buildTypes {
@@ -67,13 +71,16 @@ android {
             signingConfig signingConfigs.release
             applicationVariants.all { variant ->
 				def
-                file = variant.outputs.each { output -> 
-                            output.outputFile = new File(output.outputFile.parent, output.outputFile.name.replace(".apk", "-${variant.versionName}.apk"))
+                file = variant.outputs.each { output ->
+                    output.outputFile = new File(output.outputFile.parent, output.outputFile.name.replace(".apk", "-${variant.versionName}.apk"))
 				}
 			}
 		}
         }
+    defaultConfig {
+        vectorDrawables.useSupportLibrary = true
     }
+}
 
 //distributions.main.contents.name = "upsilon-mobileWeb"
 distributions.main.contents.from(".") {
