@@ -191,12 +191,12 @@ public class MainActivity extends AppCompatActivity implements AmqpHandler.Liste
 
 	public void onMniHomeClicked(MenuItem mniNodes) {
 		web.loadUrl(getUrl() + "/index.php");
-		o.closeDrawer(findViewById(R.id.nav_view));
+		setNavOpen(false);
 	}
 
 	public void onMniNodesClicked(MenuItem mniNodes) {
 		web.loadUrl(getUrl() + "/listNodes.php");
-		o.closeDrawer(findViewById(R.id.nav_view));
+		setNavOpen(false);
 	}
 
 	public void onMniSettingsClicked(MenuItem mniSettings) {
@@ -212,10 +212,19 @@ public class MainActivity extends AppCompatActivity implements AmqpHandler.Liste
 		web.loadUrl(getUrl());
 	}
 
+	private void setNavOpen(boolean isOpen) { 
+		DrawerLayout o = (DrawerLayout) findViewById(R.id.drawer);
+
+		if (isOpen) { 
+			o.openDrawer(findViewById(R.id.nav_view));
+		} else {
+			o.closeDrawer(findViewById(R.id.nav_view));
+		}
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		DrawerLayout o = (DrawerLayout) findViewById(R.id.drawer);
-		o.openDrawer(findViewById(R.id.nav_view));
+		setNavOpen(true);
 
 		return true;
 	}
