@@ -7,9 +7,11 @@
         android:checkableBehavior="none">
         <item
             android:icon="@drawable/ic_home_black_24px"
+            android:onClick="onMniHomeClicked"
             android:title="Home" />
         <item
             android:icon="@drawable/ic_view_list_black_24px"
+            android:onClick="onMniNodesClicked"
             android:title="Nodes" />
     </group>
 

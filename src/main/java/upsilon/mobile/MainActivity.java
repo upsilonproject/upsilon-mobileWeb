@@ -189,6 +189,14 @@ public class MainActivity extends AppCompatActivity implements AmqpHandler.Liste
 		refresh();
 	}
 
+	public void onMniHomeClicked(MenuItem mniNodes) {
+		web.loadUrl(getUrl() + "/index.php");
+	}
+
+	public void onMniNodesClicked(MenuItem mniNodes) {
+		web.loadUrl(getUrl() + "/listNodes.php");
+	}
+
 	public void onMniSettingsClicked(MenuItem mniSettings) {
 		Intent isettings = new Intent(this, SettingsActivity.class);
 
