@@ -191,10 +191,12 @@ public class MainActivity extends AppCompatActivity implements AmqpHandler.Liste
 
 	public void onMniHomeClicked(MenuItem mniNodes) {
 		web.loadUrl(getUrl() + "/index.php");
+		o.closeDrawer(findViewById(R.id.nav_view));
 	}
 
 	public void onMniNodesClicked(MenuItem mniNodes) {
 		web.loadUrl(getUrl() + "/listNodes.php");
+		o.closeDrawer(findViewById(R.id.nav_view));
 	}
 
 	public void onMniSettingsClicked(MenuItem mniSettings) {
