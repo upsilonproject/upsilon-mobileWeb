@@ -1,0 +1,42 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:title="Settings">
+
+    <PreferenceCategory app:title="WEB">
+        <EditTextPreference
+            app:key="hostname_web"
+            app:singleLine="true"
+            app:summary="The home URL for upsilon-web, eg: http://upsilon.example.com"
+            app:title="Web Hostname" />
+    </PreferenceCategory>
+    <PreferenceCategory app:title="AMQP">
+        <EditTextPreference
+            app:key="hostname_amqp"
+            app:singleLine="true"
+            app:summary="The hostname of the AMQP server."
+            app:title="AMQP Hostname" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Sync">
+        <ListPreference
+            app:defaultValue="180"
+            app:entries="@array/pref_sync_frequency_titles"
+            app:entryValues="@array/pref_sync_frequency_values"
+            app:key="sync_frequency"
+            app:negativeButtonText="@null"
+            app:positiveButtonText="@null"
+            app:title="@string/pref_title_sync_frequency" />
+
+        <!-- This preference simply launches an intent when selected. Use this UI sparingly, per
+             design guidelines. -->
+        <Preference app:title="@string/pref_title_system_sync_settings">
+            <intent app:action="android.settings.SYNC_SETTINGS" />
+        </Preference>
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Misc">
+        <SwitchPreference
+            app:defaultValue="false"
+            app:key="enable_tts"
+            app:title="Enable TTS" />
+    </PreferenceCategory>
+</PreferenceScreen>
